@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ms">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artikel - Think Quran</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom Highlight Color for Prose */
+        .prose h2,
+        .prose h3 {
+            color: #4B0E86;
+        }
+
+        .prose strong {
+            color: #4B0E86;
+        }
+    </style>
+</head>
+
+<body class="bg-[#F8F9FA] text-slate-800 pb-24">
+
+    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
+        <div class="max-w-2xl mx-auto px-4 py-4">
+            <a href="index.html" class="flex items-center text-slate-500 hover:text-[#4B0E86] font-medium transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Kembali ke Home
+            </a>
+        </div>
+    </nav>
+
+    <article class="max-w-2xl mx-auto px-4 py-8 bg-white min-h-screen shadow-sm mt-4 rounded-lg border border-gray-100">
+        <span id="post-date" class="text-xs font-bold text-[#FBD63E] uppercase tracking-wider"></span>
+        <h1 id="post-title" class="text-3xl md:text-4xl font-extrabold text-[#4B0E86] mt-2 mb-8 leading-tight"></h1>
+
+        <div
+            class="bg-gradient-to-r from-[#4B0E86] to-[#6d28d9] rounded-xl p-6 mb-10 text-white relative overflow-hidden shadow-lg">
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="text-center md:text-left">
+                    <p class="font-bold text-lg text-[#FBD63E]">Nak faham Quran cepat?</p>
+                    <p class="text-sm text-indigo-100 opacity-90">Guna teknik ThinkQuran. 15 Minit sehari je.</p>
+                </div>
+                <button onclick="goAffiliate()"
+                    class="bg-[#FBD63E] text-[#4B0E86] text-sm font-bold px-6 py-3 rounded-lg shadow hover:bg-white hover:text-[#4B0E86] transition transform hover:-translate-y-1 w-full md:w-auto">Cuba
+                    App Sekarang</button>
+            </div>
+        </div>
+
+        <div id="post-content" class="prose prose-slate prose-lg max-w-none text-slate-700 leading-relaxed">
+        </div>
+
+        <div class="mt-16 pt-8 border-t border-gray-100 text-center">
+            <p class="font-bold mb-4 text-slate-600">Serius nak belajar?</p>
+            <button onclick="goAffiliate()"
+                class="w-full bg-[#FBD63E] text-[#4B0E86] font-extrabold py-4 rounded-xl shadow-lg hover:bg-yellow-400 transition text-lg border-b-4 border-yellow-600 active:border-b-0 active:translate-y-1">Daftar
+                Think Quran Percuma</button>
+        </div>
+    </article>
+
+    <div
+        class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 md:hidden shadow-[0_-5px_10px_rgba(0,0,0,0.05)] z-40">
+        <button onclick="goAffiliate()"
+            class="w-full bg-[#4B0E86] text-white font-bold py-3.5 rounded-lg shadow-md hover:bg-[#3a0b6e]">Dapatkan
+            Akses Percuma Sekarang</button>
+    </div>
+
+    <script src="/db.js"></script>
+    <script>
+        function goAffiliate() { window.open(SITE_CONFIG.affiliateLink, '_blank'); }
+        const params = new URLSearchParams(window.location.search);
+        const currentSlug = params.get('slug');
+        const article = articles.find(a => a.slug === currentSlug);
+
+        if (article) {
+            document.title = article.title + " - " + SITE_CONFIG.name;
+            document.getElementById('post-title').innerText = article.title;
+            document.getElementById('post-date').innerText = article.date;
+            document.getElementById('post-content').innerHTML = article.content;
+        } else {
+            document.body.innerHTML = "<div class='p-10 text-center'>Artikel tak jumpa. <a href='index.html' class='text-blue-500 underline'>Balik Home</a></div>";
+        }
+    </script>
+
+    <div class="fixed bottom-4 left-4 right-4 z-50 md:hidden animate-bounce">
+        <a href="#" onclick="goAffiliate()"
+            class="block bg-[#FBD63E] text-[#4B0E86] text-center font-extrabold py-4 rounded-xl shadow-2xl border-2 border-white">
+            Daftar Percuma 👉
+        </a>
+    </div>
+</body>
+
+</html>

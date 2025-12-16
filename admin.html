@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ms">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin V3 (Import/Edit) - Celik Quran</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Preview Style - Biar sama dengan live web */
+        .ql-editor h2,
+        .ql-editor h3 {
+            color: #4B0E86 !important;
+            font-weight: 800;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .ql-editor strong {
+            color: #4B0E86;
+        }
+
+        .ql-video {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 min-h-screen pb-20">
+
+    <header class="bg-[#4B0E86] text-white py-4 px-6 shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                Admin Panel <span class="bg-orange-400 text-white text-[10px] px-2 py-0.5 rounded-full">V3
+                    (Import)</span>
+            </h1>
+            <button onclick="window.location.reload()" class="text-xs hover:text-orange-300">Reset Form</button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto mt-8 px-4 flex gap-6 flex-col lg:flex-row">
+
+        <div class="flex-1 space-y-6">
+
+            <div class="bg-orange-50 border-2 border-orange-200 p-6 rounded-xl relative">
+                <div
+                    class="absolute -top-3 -left-3 bg-orange-500 text-white px-3 py-1 rounded-lg text-xs font-bold shadow">
+                    NAK EDIT? GUNA NI</div>
+                <h3 class="font-bold text-orange-900 mb-2">Import Dari DB.js</h3>
+                <p class="text-xs text-orange-800 mb-3">Copy seketul object artikel dari fail <code>db.js</code>
+                    (bermula dari <code>{</code> sampai <code>},</code>) dan paste sini.</p>
+                <div class="flex gap-2">
+                    <textarea id="importText" rows="1"
+                        class="w-full border border-orange-300 rounded p-2 text-xs font-mono focus:ring-2 focus:ring-orange-500 outline-none"
+                        placeholder="{ slug: '...', title: '...', content: `...` },"></textarea>
+                    <button onclick="loadFromCode()"
+                        class="bg-orange-500 text-white font-bold px-4 rounded hover:bg-orange-600 whitespace-nowrap">LOAD
+                        DATA</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="font-bold text-gray-700 mb-4 border-b pb-2">1. Tulis / Edit Artikel</h2>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Tajuk</label>
+                        <input type="text" id="title" oninput="generateSlug()"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-[#4B0E86] outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Slug</label>
+                            <input type="text" id="slug"
+                                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-500"
+                                readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Tarikh</label>
+                            <input type="text" id="date" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Deskripsi</label>
+                        <textarea id="desc" rows="2"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-[#4B0E86] outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Isi Kandungan</label>
+                        <div id="editor-container" class="h-[400px] bg-white rounded-b-lg"></div>
+                    </div>
+                    <button onclick="generateJSON()"
+                        class="w-full bg-[#FBD63E] text-[#4B0E86] font-extrabold py-3 rounded-lg shadow hover:bg-yellow-400 mt-4">GENERATE
+                        NEW CODE</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-1/3">
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg sticky top-24">
+                <h2 class="font-bold text-white mb-4 text-sm uppercase">2. Hasil Code</h2>
+                <textarea id="output"
+                    class="w-full h-96 bg-slate-900 text-green-400 font-mono text-xs p-4 rounded-lg border border-slate-700 focus:outline-none"
+                    readonly onclick="this.select()"></textarea>
+                <button onclick="copyToClipboard()" id="copyBtn"
+                    class="w-full mt-4 bg-white/10 text-white border border-white/20 py-2.5 rounded hover:bg-white/20 transition text-sm font-semibold">Copy
+                    Code</button>
+                <p class="text-slate-500 text-[10px] mt-3 italic text-center">Tips: Lepas copy, pergi db.js, highlight
+                    artikel lama, dan PASTE (Replace).</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        // Init Editor
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image', 'video'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Set Date Default
+        document.getElementById('date').value = new Date().toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        // Auto Slug
+        function generateSlug() {
+            const title = document.getElementById('title').value;
+            const slug = title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+            document.getElementById('slug').value = slug;
+        }
+
+        // --- FUNGSI IMPORT MAGIC ---
+        function loadFromCode() {
+            let input = document.getElementById('importText').value.trim();
+
+            // Buang koma kat hujung kalau ada
+            if (input.endsWith(',')) input = input.slice(0, -1);
+
+            try {
+                // Tukar string object JS kepada JSON sebenar guna teknik Function constructor (sebab format db.js bukan strict JSON)
+                // Ini teknik hacker sikit tapi selamat untuk local use
+                const obj = Function('"use strict";return (' + input + ')')();
+
+                // Masukkan data ke field
+                document.getElementById('title').value = obj.title || '';
+                document.getElementById('slug').value = obj.slug || '';
+                document.getElementById('date').value = obj.date || '';
+                document.getElementById('desc').value = obj.desc || '';
+
+                // Masukkan content ke editor Quill
+                if (obj.content) {
+                    quill.clipboard.dangerouslyPasteHTML(obj.content);
+                }
+
+                alert("Berjaya load! Boleh edit sekarang.");
+
+            } catch (e) {
+                alert("Error! Pastikan kau copy 'seketul' object dari { sampai } dengan betul.\n\nError detail: " + e.message);
+            }
+        }
+
+        // Generate JSON
+        function generateJSON() {
+            const title = document.getElementById('title').value;
+            const slug = document.getElementById('slug').value;
+            const date = document.getElementById('date').value;
+            const desc = document.getElementById('desc').value;
+            let content = quill.root.innerHTML;
+            content = content.replace(/`/g, '\\`'); // Escape backticks
+
+            if (!title) return alert("Tajuk kosong bang!");
+
+            const outputString = `
+    {
+        slug: "${slug}",
+        title: "${title}",
+        desc: "${desc}",
+        date: "${date}",
+        content: \`
+${content}
+        \`
+    },`;
+            document.getElementById('output').value = outputString;
+        }
+
+        // Copy
+        function copyToClipboard() {
+            const copyText = document.getElementById("output");
+            if (!copyText.value) return;
+            copyText.select();
+            document.execCommand("copy");
+            document.getElementById("copyBtn").innerText = "✅ Dah Copy!";
+            setTimeout(() => document.getElementById("copyBtn").innerText = "Copy Code", 2000);
+        }
+    </script>
+</body>
+
+</html>
